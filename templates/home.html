@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% block title %}Home — Blog API{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        text-align: center;
+        padding: 4rem 1rem 3rem;
+    }
+    .hero-badge {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        background: rgba(108,99,255,0.14); border: 1px solid rgba(108,99,255,0.28);
+        color: #a99cff; padding: 0.38rem 1rem; border-radius: 50px;
+        font-size: 0.78rem; font-weight: 600; margin-bottom: 1.5rem;
+    }
+    .hero-title {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 900; line-height: 1.1; margin-bottom: 1rem;
+    }
+    .grad-text {
+        background: linear-gradient(135deg, #6c63ff, #00d4ff);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub {
+        color: rgba(255,255,255,0.45); font-size: 1rem; max-width: 480px;
+        margin: 0 auto 2rem; line-height: 1.7;
+    }
+    .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; justify-content: center; margin-bottom: 3rem; }
+    .stat-row { display: flex; gap: 2.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 3.5rem; }
+    .stat-item { text-align: center; }
+    .stat-num { font-size: 1.75rem; font-weight: 900; }
+    .stat-lbl { font-size: 0.72rem; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 0.08em; }
+
+    /* POST CARDS */
+    .section-heading {
+        font-size: 1.4rem; font-weight: 800; margin-bottom: 1.5rem;
+        display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-heading-line {
+        flex: 1; height: 1px; background: rgba(255,255,255,0.07);
+    }
+    .post-card {
+        background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px; overflow: hidden; transition: all 0.3s; height: 100%;
+        display: flex; flex-direction: column;
+    }
+    .post-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(108,99,255,0.35);
+        box-shadow: 0 16px 50px rgba(108,99,255,0.14);
+    }
+    .post-img {
+        height: 175px; object-fit: cover; width: 100%;
+    }
+    .post-img-placeholder {
+        height: 175px;
+        background: linear-gradient(135deg, rgba(108,99,255,0.15), rgba(0,212,255,0.08));
+        display: flex; align-items: center; justify-content: center;
+        color: rgba(61, 40, 40, 0.12); font-size: 2rem;
+    }
+    .post-body { padding: 1.2rem; flex: 1; display: flex; flex-direction: column; }
+    .post-meta { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.7rem; flex-wrap: wrap; }
+    .cat-tag {
+        padding: 0.18em 0.65em; border-radius: 50px; font-size: 0.7rem; font-weight: 700;
+        background: rgba(108,99,255,0.14); border: 1px solid rgba(108,99,255,0.22); color: #a99cff;
+    }
+    .meta-text { font-size: 0.75rem; color: rgba(255,255,255,0.32); }
+    .post-title-link {
+        font-size: 1rem; font-weight: 700; color: #e0e0f0; text-decoration: none;
+        line-height: 1.35; display: block; margin-bottom: 0.5rem;
+        transition: color 0.15s;
+    }
+    .post-title-link:hover { color: #8b80ff; }
+    .post-excerpt { font-size: 0.83rem; color: rgba(255,255,255,0.35); line-height: 1.55; flex: 1; margin-bottom: 0; }
+    .post-footer {
+        display: flex; align-items: center; gap: 1rem; margin-top: 1rem;
+        padding-top: 0.9rem; border-top: 1px solid rgba(255,255,255,0.06);
+        font-size: 0.78rem; color: rgba(255,255,255,0.32);
+    }
+    .post-stat { display: flex; align-items: center; gap: 0.3rem; }
+    .post-stat i { font-size: 0.72rem; }
+    .read-link {
+        margin-left: auto; color: #8b80ff; text-decoration: none; font-weight: 600;
+        font-size: 0.78rem; display: flex; align-items: center; gap: 0.3rem;
+    }
+    .read-link:hover { color: #a99cff; }
+
+    /* EMPTY STATE */
+    .empty-state {
+        background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.1);
+        border-radius: 16px; padding: 4rem 2rem; text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<section class="hero-section">
+    <div class="hero-badge">
+        <i class="fa-solid fa-circle-dot" style="color:#6c63ff"></i>
+        Django REST Framework &middot; JWT Auth &middot; v1.0
+    </div>
+    <h1 class="hero-title">
+        Welcome to_ <span class="grad-text">Blog API</span><br>System 🚀
+    </h1>
+    <p class="hero-sub">
+        Token-based REST API with full CRUD, comments, likes, image uploads, and advanced filtering..
+    </p>
+    <div class="hero-actions">
+        <a href="/posts/" class="btn-gradient" style="text-decoration:none; padding:0.75rem 1.75rem; font-size:0.95rem;">
+            <i class="fa-solid fa-newspaper"></i> Browse Posts
+        </a>
+        {% if request.user.is_authenticated %}
+        <a href="/posts/create/" class="btn-outline-glass" style="padding:0.75rem 1.75rem; font-size:0.95rem;">
+            <i class="fa-solid fa-plus"></i> New Posts
+        </a>
+        {% else %}
+        <a href="/register/" class="btn-outline-glass" style="padding:0.75rem 1.75rem; font-size:0.95rem;">
+            <i class="fa-solid fa-user-plus"></i> Get Started
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="stat-row">
+        <div class="stat-item">
+            <div class="stat-num grad-text">{{ total_posts }}</div>
+            <div class="stat-lbl">Posts</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num" style="background:linear-gradient(135deg,#00d4ff,#6c63ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">JWT</div>
+            <div class="stat-lbl">Auth</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num grad-text">REST</div>
+            <div class="stat-lbl">API</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-num grad-text">15+</div>
+            <div class="stat-lbl">Endpoints</div>
+        </div>
+    </div>
+</section>
+
+<!-- LATEST POSTS -->
+<div class="section-heading">
+    <span>RecenT Posts</span>
+    <span class="section-heading-line"></span>
+    <a href="/posts/" style="font-size:0.8rem;color:#8b80ff;text-decoration:none;font-weight:600;white-space:nowrap;">
+        View all <i class="fa-solid fa-arrow-right ms-1"></i>
+    </a>
+</div>
+
+{% if posts %}
+<div class="row g-3 mb-5">
+    {% for post in posts %}
+    <div class="col-sm-6 col-lg-4">
+        <div class="post-card">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" class="post-img" alt="{{ post.title }}">
+            {% else %}
+                <div class="post-img-placeholder"><i class="fa-solid fa-image"></i></div>
+            {% endif %}
+
+            <div class="post-body">
+                <div class="post-meta">
+                    <span class="cat-tag">{{ post.category.name }}</span>
+                    <span class="meta-text">{{ post.created_at|date:"M d, Y" }}</span>
+                </div>
+                <a href="/posts/{{ post.id }}/" class="post-title-link">{{ post.title }}</a>
+                <p class="post-excerpt">{{ post.content|truncatewords:18 }}</p>
+                <div class="post-footer">
+                    <span class="post-stat">
+                        <i class="fa-solid fa-heart" style="color:#ff6b9d"></i> {{ post.likes.count }}
+                    </span>
+                    <span class="post-stat">
+                        <i class="fa-solid fa-comment" style="color:#8b80ff"></i> {{ post.comments.count }}
+                    </span>
+                    <span class="post-stat">
+                        <i class="fa-solid fa-user"></i> {{ post.author.username }}
+                    </span>
+                    <a href="/posts/{{ post.id }}/" class="read-link">
+                        Read <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state mb-5">
+    <i class="fa-solid fa-newspaper" style="font-size:2.5rem;color:rgba(255,255,255,0.1);display:block;margin-bottom:1rem;"></i>
+    <h5 style="color:rgba(255,255,255,0.35);font-weight:600;">No posts yet</h5>
+    <p style="color:rgba(255,255,255,0.22);font-size:0.875rem;margin-bottom:1.5rem;">Be the first to share something!</p>
+    {% if request.user.is_authenticated %}
+    <a href="/posts/create/" class="btn-gradient" style="text-decoration:none;">
+        <i class="fa-solid fa-plus"></i> Create Post
+    </a>
+    {% else %}
+    <a href="/register/" class="btn-gradient" style="text-decoration:none;">
+        <i class="fa-solid fa-user-plus"></i> Register & Post
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

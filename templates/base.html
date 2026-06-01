@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Blog API{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c63ff;
+            --accent: #00d4ff;
+            --dark: #090916;
+            --card-bg: rgba(255,255,255,0.05);
+            --border: rgba(255,255,255,0.1);
+        }
+        * { box-sizing: border-box; }
+        body {
+            background: var(--dark);
+            background-image:
+                radial-gradient(ellipse at 20% 20%, rgba(108,99,255,0.13) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(0,212,255,0.08) 0%, transparent 50%);
+            color: #e0e0f0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+        /* ---- NAVBAR ---- */
+        .top-navbar {
+            background: rgba(10,10,26,0.88);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0.85rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar-brand-custom {
+            font-weight: 800;
+            font-size: 1.35rem;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+        .nav-link-custom {
+            color: rgba(255,255,255,0.6) !important;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 0.35rem 0.75rem !important;
+            border-radius: 8px;
+        }
+        .nav-link-custom:hover { color: #fff !important; background: rgba(255,255,255,0.07); }
+        .nav-link-custom.active-link { color: #fff !important; }
+        .nav-pill {
+            display: inline-flex; align-items: center; gap: 0.4rem;
+            padding: 0.42rem 1rem; border-radius: 50px;
+            font-size: 0.825rem; font-weight: 600;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .nav-pill-outline {
+            border: 1px solid rgba(255,255,255,0.22);
+            color: rgba(255,255,255,0.75);
+        }
+        .nav-pill-outline:hover { border-color: var(--primary); color: #fff; background: rgba(108,99,255,0.15); }
+        .nav-pill-primary {
+            background: linear-gradient(135deg, var(--primary), #8b80ff);
+            color: #fff; border: none;
+        }
+        .nav-pill-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(108,99,255,0.4); color: #fff; }
+        .nav-pill-danger {
+            background: linear-gradient(135deg, #f50057, #ff4081);
+            color: #fff; border: none;
+        }
+        .nav-pill-danger:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245,0,87,0.4); color: #fff; }
+        .nav-pill-user {
+            background: rgba(0,212,255,0.12);
+            border: 1px solid rgba(0,212,255,0.28);
+            color: var(--accent);
+        }
+        .navbar-toggler-custom {
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 0.4rem 0.65rem;
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+        }
+
+        /* ---- CARDS ---- */
+        .glass-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .glass-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(108,99,255,0.12); }
+
+        /* ---- BUTTONS ---- */
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--primary), #8b80ff);
+            border: none; color: #fff; font-weight: 600;
+            border-radius: 10px; padding: 0.6rem 1.5rem;
+            transition: all 0.2s; cursor: pointer; display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(108,99,255,0.45); color: #fff; }
+        .btn-gradient-danger {
+            background: linear-gradient(135deg, #f50057, #ff4081);
+            border: none; color: #fff; font-weight: 600;
+            border-radius: 10px; padding: 0.6rem 1.5rem; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        .btn-gradient-danger:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(245,0,87,0.4); color: #fff; }
+        .btn-outline-glass {
+            border: 1px solid var(--border); color: rgba(255,255,255,0.7);
+            border-radius: 10px; padding: 0.6rem 1.5rem;
+            background: transparent; transition: all 0.2s;
+            display: inline-flex; align-items: center; gap: 0.4rem; text-decoration: none;
+        }
+        .btn-outline-glass:hover { background: rgba(255,255,255,0.08); color: #fff; border-color: rgba(255,255,255,0.3); }
+
+        /* ---- FORMS ---- */
+        .form-control, .form-select {
+            background: rgba(255,255,255,0.06) !important;
+            border: 1px solid var(--border) !important;
+            color: #e0e0f0 !important;
+            border-radius: 10px;
+            padding: 0.65rem 1rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-control:focus, .form-select:focus {
+            box-shadow: 0 0 0 3px rgba(108,99,255,0.22) !important;
+            border-color: var(--primary) !important;
+            background: rgba(255,255,255,0.09) !important;
+        }
+        .form-control::placeholder { color: rgba(255,255,255,0.28); }
+        .form-label { font-weight: 600; color: rgba(255,255,255,0.65); font-size: 0.85rem; margin-bottom: 0.4rem; }
+        .input-group-text {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: rgba(255,255,255,0.45);
+            border-right: none;
+        }
+        select.form-select option { background: #1a1a2e; color: #e0e0f0; }
+
+        /* ---- ALERTS ---- */
+        .alert-glass {
+            background: rgba(245,0,87,0.1); border: 1px solid rgba(245,0,87,0.28);
+            color: #ff6b9d; border-radius: 10px;
+        }
+        .alert-success-glass {
+            background: rgba(0,230,118,0.08); border: 1px solid rgba(0,230,118,0.28);
+            color: #69f0ae; border-radius: 10px;
+        }
+
+        /* ---- MISC ---- */
+        .badge-glass {
+            background: rgba(108,99,255,0.18); border: 1px solid rgba(108,99,255,0.3);
+            color: #a99cff; padding: 0.32em 0.7em; border-radius: 50px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .page-title {
+            font-size: 1.75rem; font-weight: 800;
+            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.45));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .divider { border: none; border-top: 1px solid var(--border); margin: 1.5rem 0; }
+        .main-wrap { padding: 2.5rem 0 4rem; }
+        .site-footer {
+            border-top: 1px solid var(--border); padding: 1.4rem 0;
+            text-align: center; color: rgba(255,255,255,0.22); font-size: 0.8rem;
+        }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(108,99,255,0.4); border-radius: 3px; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<nav class="top-navbar">
+    <div class="container">
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-4">
+                <a class="navbar-brand-custom" href="/">
+                    <i class="fa-solid fa-rocket me-1"></i> Blog API
+                </a>
+                <div class="d-none d-md-flex align-items-center gap-1">
+                    <a href="/" class="nav-link-custom">
+                        <i class="fa-solid fa-house me-1"></i> Home
+                    </a>
+                    <a href="/posts/" class="nav-link-custom">
+                        <i class="fa-solid fa-newspaper me-1"></i> Posts
+                    </a>
+                    <a href="/api/" class="nav-link-custom">
+                        <i class="fa-solid fa-plug me-1"></i> API
+                    </a>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                {% if request.user.is_authenticated %}
+                    <span class="nav-pill nav-pill-user d-none d-sm-inline-flex">
+                        <i class="fa-solid fa-circle-user"></i> {{ request.user.username }}
+                    </span>
+                    <a href="/profile/" class="nav-pill nav-pill-outline d-none d-sm-inline-flex">
+                        <i class="fa-solid fa-id-card"></i> Profile
+                    </a>
+                    <a href="/logout/" class="nav-pill nav-pill-danger">
+                        <i class="fa-solid fa-right-from-bracket"></i> Logout
+                    </a>
+                {% else %}
+                    <a href="/login/" class="nav-pill nav-pill-outline">
+                        <i class="fa-solid fa-right-to-bracket"></i> Login
+                    </a>
+                    <a href="/register/" class="nav-pill nav-pill-primary">
+                        <i class="fa-solid fa-user-plus"></i> Register
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ===== MAIN ===== -->
+<div class="main-wrap">
+    <div class="container">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert-glass p-3 mb-3 d-flex align-items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i> {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<footer class="site-footer">
+    <div class="container">
+        <i class="fa-solid fa-rocket me-1"></i> BLOG API System &mdash; Django REST Framework &middot; JWT Auth
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

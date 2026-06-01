@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Edit Post — Blog API{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="glass-card p-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:46px;height:46px;background:rgba(245,158,11,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-pen" style="color:#fcd34d;font-size:1.1rem;"></i>
+                </div>
+                <div>
+                    <h4 style="font-weight:800;margin:0;">Edit Post</h4>
+                    <div style="font-size:0.8rem;color:rgba(255,255,255,0.35);">Update your article</div>
+                </div>
+            </div>
+
+            {% if error %}
+            <div class="alert-glass p-3 mb-3 d-flex align-items-center gap-2" style="font-size:0.875rem;">
+                <i class="fa-solid fa-triangle-exclamation"></i> {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Title <span style="color:#ff6b9d">*</span></label>
+                    <input type="text" name="title" class="form-control" value="{{ post.title }}" required minlength="5">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Category <span style="color:#ff6b9d">*</span></label>
+                    <select name="category" class="form-select" required>
+                        {% for cat in categories %}
+                        <option value="{{ cat.id }}" {% if post.category.id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Content <span style="color:#ff6b9d">*</span></label>
+                    <textarea name="content" class="form-control" rows="10" required>{{ post.content }}</textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Cover Image</label>
+                    {% if post.image %}
+                    <div class="mb-2">
+                        <img src="{{ post.image.url }}" alt="Current"
+                             style="max-height:140px;border-radius:10px;object-fit:cover;border:1px solid rgba(255,255,255,0.1);">
+                        <div style="font-size:0.75rem;color:rgba(255,255,255,0.3);margin-top:0.35rem;">
+                            <i class="fa-solid fa-image me-1"></i> Current image
+                        </div>
+                    </div>
+                    {% endif %}
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                    <div style="font-size:0.75rem;color:rgba(255,255,255,0.25);margin-top:0.35rem;">
+                        Leave empty to keep current image.
+                    </div>
+                </div>
+
+                <div class="d-flex gap-3">
+                    <button type="submit" class="btn-gradient">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                    </button>
+                    <a href="/posts/{{ post.pk }}/" class="btn-outline-glass">
+                        <i class="fa-solid fa-xmark"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

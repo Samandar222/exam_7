@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Profile — Blog API{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Sidebar -->
+    <div class="col-md-4">
+        <div class="glass-card p-4 text-center">
+            <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#6c63ff,#00d4ff);display:flex;align-items:center;justify-content:center;font-size:2.2rem;margin:0 auto 1rem;font-weight:800;color:#fff;">
+                {{ user.username|first|upper }}
+            </div>
+            <h4 style="font-weight:800;">{{ user.username }}</h4>
+            <p style="color:rgba(255,255,255,0.4);font-size:0.875rem;">{{ user.email }}</p>
+            <span class="badge-glass mt-2 d-inline-block">
+                {% if user.is_staff %}<i class="fa-solid fa-crown me-1"></i>Staff{% else %}<i class="fa-solid fa-user me-1"></i>Member{% endif %}
+            </span>
+            {% if user.bio %}
+            <hr class="divider">
+            <p style="font-size:0.875rem;color:rgba(255,255,255,0.5);line-height:1.6;">{{ user.bio }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main -->
+    <div class="col-md-8">
+        <div class="glass-card p-4">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                <div style="width:42px;height:42px;background:rgba(108,99,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                    <i class="fa-solid fa-pen-to-square" style="color:#8b80ff"></i>
+                </div>
+                <div>
+                    <h5 style="font-weight:800;margin:0;">Update Profile</h5>
+                    <div style="font-size:0.8rem;color:rgba(255,255,255,0.35);">Edit your personal information</div>
+                </div>
+            </div>
+
+            {% if success %}
+            <div class="alert-success-glass p-3 mb-3 d-flex align-items-center gap-2" style="font-size:0.875rem;">
+                <i class="fa-solid fa-circle-check"></i> Profile updated successfully!
+            </div>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" name="email" class="form-control"
+                               value="{{ user.email }}" placeholder="your@email.com">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Bio</label>
+                    <textarea name="bio" class="form-control" rows="3"
+                              placeholder="Tell us about yourself...">{{ user.bio|default:'' }}</textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Avatar</label>
+                    <input type="file" name="avatar" class="form-control" accept="image/*">
+                    {% if user.avatar %}
+                    <div class="mt-2" style="font-size:0.8rem;color:rgba(255,255,255,0.35);">
+                        <i class="fa-solid fa-image me-1"></i> Current: {{ user.avatar.name }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn-gradient">
+                    <i class="fa-solid fa-floppy-disk me-2"></i> Save Changes
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

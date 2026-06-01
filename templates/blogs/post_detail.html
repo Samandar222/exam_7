@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} — Blog API{% endblock %}
+
+{% block extra_css %}
+<style>
+.post-hero-img { width:100%; max-height:400px; object-fit:cover; display:block; }
+.post-img-placeholder {
+    height:220px;
+    background:linear-gradient(135deg,rgba(108,99,255,0.14),rgba(0,212,255,0.07));
+    display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,0.1); font-size:3rem;
+}
+.like-btn {
+    display:inline-flex; align-items:center; gap:0.5rem;
+    padding:0.5rem 1.3rem; border-radius:50px; font-size:0.875rem; font-weight:600;
+    border:none; cursor:pointer; transition:all 0.2s; width:100%;
+    justify-content:center;
+}
+.like-btn-on  { background:rgba(245,0,87,0.18); border:1px solid rgba(245,0,87,0.35); color:#ff6b9d; }
+.like-btn-on:hover  { background:rgba(245,0,87,0.28); transform:scale(1.04); }
+.like-btn-off { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); color:rgba(255,255,255,0.5); }
+.like-btn-off:hover { background:rgba(245,0,87,0.12); border-color:rgba(245,0,87,0.25); color:#ff6b9d; }
+.comment-card {
+    background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07);
+    border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.65rem;
+}
+.comment-avatar {
+    width:36px; height:36px; border-radius:50%;
+    background:linear-gradient(135deg,#6c63ff,#00d4ff);
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:0.85rem; color:#fff; flex-shrink:0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- LEFT: Post content -->
+    <div class="col-lg-8">
+        <div class="glass-card p-0 mb-4" style="overflow:hidden;">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" class="post-hero-img" alt="{{ post.title }}">
+            {% else %}
+                <div class="post-img-placeholder"><i class="fa-solid fa-image"></i></div>
+            {% endif %}
+
+            <div class="p-4">
+                <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+                    <span style="background:rgba(108,99,255,0.14);border:1px solid rgba(108,99,255,0.24);color:#a99cff;padding:0.22em 0.75em;border-radius:50px;font-size:0.76rem;font-weight:700;">
+                        {{ post.category.name }}
+                    </span>
+                    <span style="font-size:0.8rem;color:rgba(255,255,255,0.35);">
+                        <i class="fa-regular fa-calendar me-1"></i>{{ post.created_at|date:"F d, Y" }}
+                    </span>
+                </div>
+
+                <h1 style="font-size:1.8rem;font-weight:800;line-height:1.25;margin-bottom:1.5rem;">
+                    {{ post.title }}
+                </h1>
+
+                <div style="line-height:1.85;color:rgba(255,255,255,0.68);font-size:0.95rem;">
+                    {{ post.content|linebreaks }}
+                </div>
+            </div>
+        </div>
+
+        <!-- COMMENTS -->
+        <div class="glass-card p-4">
+            <h5 style="font-weight:800;margin-bottom:1.5rem;">
+                <i class="fa-solid fa-comments me-2" style="color:#8b80ff"></i>
+                Comments
+                <span class="badge-glass ms-2">{{ post.comments.count }}</span>
+            </h5>
+
+            {% if request.user.is_authenticated %}
+            <form method="POST" action="" class="mb-4">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="comment">
+                <textarea name="text" class="form-control mb-2" rows="3"
+                          placeholder="Write a comment..." required></textarea>
+                <button type="submit" class="btn-gradient" style="font-size:0.875rem;padding:0.5rem 1.25rem;">
+                    <i class="fa-solid fa-paper-plane"></i> Post Comment
+                </button>
+            </form>
+            <hr class="divider">
+            {% else %}
+            <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:1rem;margin-bottom:1.5rem;text-align:center;font-size:0.875rem;color:rgba(255,255,255,0.35);">
+                <a href="/login/" style="color:#8b80ff;font-weight:600;">Login</a> to leave a comment.
+            </div>
+            {% endif %}
+
+            {% for comment in post.comments.all %}
+            <div class="comment-card">
+                <div class="d-flex gap-3">
+                    <div class="comment-avatar">{{ comment.user.username|first|upper }}</div>
+                    <div style="flex:1;">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span style="font-weight:700;font-size:0.875rem;">{{ comment.user.username }}</span>
+                            <span style="font-size:0.73rem;color:rgba(255,255,255,0.28);">{{ comment.created_at|date:"M d, Y" }}</span>
+                        </div>
+                        <p style="margin:0;color:rgba(255,255,255,0.6);font-size:0.875rem;line-height:1.6;">{{ comment.text }}</p>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p style="text-align:center;color:rgba(255,255,255,0.25);font-size:0.875rem;padding:1rem 0;">
+                No comments yet. Be the first!
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- RIGHT: Sidebar -->
+    <div class="col-lg-4">
+        <!-- Author -->
+        <div class="glass-card p-4 mb-3">
+            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.85rem;">Author</div>
+            <div class="d-flex align-items-center gap-3">
+                <div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#6c63ff,#00d4ff);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:1.1rem;">
+                    {{ post.author.username|first|upper }}
+                </div>
+                <div>
+                    <div style="font-weight:700;">{{ post.author.username }}</div>
+                    <div style="font-size:0.78rem;color:rgba(255,255,255,0.35);">Post Author</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="glass-card p-4 mb-3">
+            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.85rem;">Stats</div>
+            <div class="d-flex gap-2">
+                <div class="text-center flex-fill" style="background:rgba(245,0,87,0.08);border:1px solid rgba(245,0,87,0.14);border-radius:10px;padding:0.75rem;">
+                    <div style="font-size:1.6rem;font-weight:800;color:#ff6b9d;">{{ post.likes.count }}</div>
+                    <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);">Likes</div>
+                </div>
+                <div class="text-center flex-fill" style="background:rgba(108,99,255,0.08);border:1px solid rgba(108,99,255,0.14);border-radius:10px;padding:0.75rem;">
+                    <div style="font-size:1.6rem;font-weight:800;color:#8b80ff;">{{ post.comments.count }}</div>
+                    <div style="font-size:0.72rem;color:rgba(255,255,255,0.35);">Comments</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="glass-card p-4">
+            <div style="font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.85rem;">Actions</div>
+            <div class="d-flex flex-column gap-2">
+
+                {% if request.user.is_authenticated %}
+                    {% if user_liked %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="unlike">
+                        <button type="submit" class="like-btn like-btn-on">
+                            <i class="fa-solid fa-heart"></i> Unlike
+                        </button>
+                    </form>
+                    {% else %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="like">
+                        <button type="submit" class="like-btn like-btn-off">
+                            <i class="fa-regular fa-heart"></i> Like this post
+                        </button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+
+                {% if request.user == post.author %}
+                <a href="/posts/{{ post.pk }}/update/" class="btn-gradient" style="text-decoration:none;font-size:0.875rem;justify-content:center;">
+                    <i class="fa-solid fa-pen"></i> Edit Post
+                </a>
+                <a href="/posts/{{ post.pk }}/delete/" class="btn-gradient-danger" style="text-decoration:none;font-size:0.875rem;justify-content:center;border-radius:10px;padding:0.6rem 1.5rem;display:flex;align-items:center;gap:0.4rem;">
+                    <i class="fa-solid fa-trash"></i> Delete Post
+                </a>
+                {% endif %}
+
+                <a href="/posts/" class="btn-outline-glass" style="font-size:0.875rem;justify-content:center;">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Posts
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

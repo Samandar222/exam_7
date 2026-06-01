@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}Posts — Blog API{% endblock %}
+
+{% block extra_css %}
+<style>
+.search-bar {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:14px; padding:1.25rem 1.5rem; margin-bottom:2rem;
+}
+.post-card {
+    background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08);
+    border-radius:16px; overflow:hidden; transition:all 0.3s; height:100%; display:flex; flex-direction:column;
+}
+.post-card:hover { transform:translateY(-5px); border-color:rgba(108,99,255,0.35); box-shadow:0 16px 50px rgba(108,99,255,0.14); }
+.post-img { height:175px; object-fit:cover; width:100%; }
+.post-img-placeholder {
+    height:175px; background:linear-gradient(135deg,rgba(108,99,255,0.14),rgba(0,212,255,0.07));
+    display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.12); font-size:2rem;
+}
+.post-body { padding:1.2rem; flex:1; display:flex; flex-direction:column; }
+.post-meta { display:flex; align-items:center; gap:0.6rem; margin-bottom:0.7rem; flex-wrap:wrap; }
+.cat-tag {
+    padding:0.18em 0.65em; border-radius:50px; font-size:0.7rem; font-weight:700;
+    background:rgba(108,99,255,0.14); border:1px solid rgba(108,99,255,0.22); color:#a99cff;
+}
+.post-title-link {
+    font-size:1rem; font-weight:700; color:#e0e0f0; text-decoration:none; line-height:1.35;
+    display:block; margin-bottom:0.5rem; transition:color 0.15s;
+}
+.post-title-link:hover { color:#8b80ff; }
+.post-footer {
+    display:flex; align-items:center; gap:0.85rem; margin-top:auto;
+    padding-top:0.9rem; border-top:1px solid rgba(255,255,255,0.06);
+    font-size:0.78rem; color:rgba(255,255,255,0.32);
+}
+.post-stat { display:flex; align-items:center; gap:0.3rem; }
+.read-link {
+    margin-left:auto; color:#8b80ff; text-decoration:none; font-weight:600;
+    font-size:0.78rem; display:flex; align-items:center; gap:0.3rem;
+}
+.read-link:hover { color:#a99cff; }
+.empty-state {
+    background:rgba(255,255,255,0.03); border:1px dashed rgba(255,255,255,0.1);
+    border-radius:16px; padding:4rem 2rem; text-align:center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h1 class="page-title mb-1">Blog Posts</h1>
+        <p style="color:rgba(255,255,255,0.35);font-size:0.875rem;margin:0;">Explore all published articles</p>
+    </div>
+    {% if request.user.is_authenticated %}
+    <a href="/posts/create/" class="btn-gradient" style="text-decoration:none;">
+        <i class="fa-solid fa-plus"></i> New Post
+    </a>
+    {% endif %}
+</div>
+
+<!-- Search & Filter -->
+<div class="search-bar">
+    <form method="GET" class="row g-3 align-items-end">
+        <div class="col-md-5">
+            <label class="form-label"><i class="fa-solid fa-magnifying-glass me-1"></i> Search</label>
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search by title..." value="{{ request.GET.search }}">
+        </div>
+        <div class="col-md-4">
+            <label class="form-label"><i class="fa-solid fa-tag me-1"></i> Category</label>
+            <select name="category" class="form-select">
+                <option value="">All categories</option>
+                {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if request.GET.category == cat.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cat.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn-gradient w-100">
+                <i class="fa-solid fa-filter"></i> Filter
+            </button>
+        </div>
+    </form>
+</div>
+
+{% if posts %}
+<div class="row g-3">
+    {% for post in posts %}
+    <div class="col-sm-6 col-lg-4">
+        <div class="post-card">
+            {% if post.image %}
+                <img src="{{ post.image.url }}" class="post-img" alt="{{ post.title }}">
+            {% else %}
+                <div class="post-img-placeholder"><i class="fa-solid fa-image"></i></div>
+            {% endif %}
+
+            <div class="post-body">
+                <div class="post-meta">
+                    <span class="cat-tag">{{ post.category.name }}</span>
+                    <span style="font-size:0.73rem;color:rgba(255,255,255,0.32);">{{ post.created_at|date:"M d, Y" }}</span>
+                </div>
+                <a href="/posts/{{ post.pk }}/" class="post-title-link">{{ post.title }}</a>
+                <p style="font-size:0.83rem;color:rgba(255,255,255,0.35);line-height:1.55;flex:1;">
+                    {{ post.content|truncatewords:15 }}
+                </p>
+                <div class="post-footer">
+                    <span class="post-stat">
+                        <i class="fa-solid fa-heart" style="color:#ff6b9d;font-size:0.72rem;"></i>
+                        {{ post.likes.count }}
+                    </span>
+                    <span class="post-stat">
+                        <i class="fa-solid fa-comment" style="color:#8b80ff;font-size:0.72rem;"></i>
+                        {{ post.comments.count }}
+                    </span>
+                    <span class="post-stat">
+                        <i class="fa-solid fa-user" style="font-size:0.72rem;"></i>
+                        {{ post.author.username }}
+                    </span>
+                    <a href="/posts/{{ post.pk }}/" class="read-link">
+                        Read <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fa-solid fa-newspaper" style="font-size:2.5rem;color:rgba(255,255,255,0.1);display:block;margin-bottom:1rem;"></i>
+    <h5 style="color:rgba(255,255,255,0.35);font-weight:600;">No posts found</h5>
+    <p style="color:rgba(255,255,255,0.22);font-size:0.875rem;">Try adjusting your search or filter.</p>
+</div>
+{% endif %}
+{% endblock %}
